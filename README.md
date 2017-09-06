@@ -1,4 +1,4 @@
-# Desktime Reporting
+<h1 align="center">Desktime Reporting</h1>
 <p align="center">Desktime Reporting project gives insights about employee's working hours using Desktime API.</p>
 
 
