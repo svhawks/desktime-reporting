@@ -1,0 +1,126 @@
+﻿@{
+    DateTime start = DateTime.Today;
+    DateTime end = DateTime.Today;
+    string manager = ViewData["manager"].ToString();
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Desktime Reporting</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="~/lib/FileSaver.min.js"></script>
+    <script type="text/javascript" src="~/lib/xlsx.core.min.js"></script>
+    <script type="text/javascript" src="~/lib/tableexport.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function myfunction() {
+            /* default `filename` property if "id" attribute is unset */
+            TableExport.prototype.defaultFilename = "desktime_reporting";
+
+            /* default class to style buttons when not using Bootstrap or the built-in export buttons, i.e. when (`bootstrap: false` & `exportButtons: true`)  */
+            TableExport.prototype.defaultButton = "btn btn-primary btn-sm";
+            /* Excel Open XML spreadsheet (.xlsx) */
+            TableExport.prototype.xlsx = {
+                defaultClass: "xlsx",
+                buttonContent: "Export to Excel",
+                mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fileExtension: ".xlsx"
+            };
+
+
+            TableExport(document.getElementsByTagName("table"), {
+                formats: ["xlsx"],
+                bootstrap: false                           // (Boolean), style buttons using bootstrap, (default: true)
+            });
+        });
+    </script>
+    <style>
+        table tr td, table th td {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-light bg-light" style="margin-bottom: 30px">
+        <a class="navbar-brand" href="#">Desktime Reporting</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Index">Home</a>
+                </li>
+                @{
+                    start = DateTime.Today.GetFirstDayOfWeek().AddDays(1);
+                    end = DateTime.UtcNow.AddHours(-8);
+                }
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        This Week
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="@Url.Action("DailyTable", "DailyTable", new { startDate = start.ToString("yyyy-MM-dd"), endDate = end.ToString("yyyy-MM-dd"), manager = manager })">Daily</a>
+                        <a class="dropdown-item" href="@Url.Action("WeeklyTable", "WeeklyTable", new { startDate = start.ToString("yyyy-MM-dd"), endDate = end.ToString("yyyy-MM-dd"), manager = manager })">Total</a>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        This Month
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="@Url.Action("WeeklyTable", "WeeklyTable", new { startDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).ToString("yyyy-MM-dd"), endDate = DateTime.UtcNow.AddHours(-8).ToString("yyyy-MM-dd"), manager = manager })">Weekly</a>
+                    </div>
+                </li>
+
+                @{
+                    start = new DateTime(DateTime.Today.Year, 1, 1);
+                    end = new DateTime(DateTime.Today.Year, 3, 1);
+                }
+
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        This Year
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="@Url.Action("MonthlyTablePage", "MonthlyTablePage", new { startDate = start.ToString("yyyy-MM-dd"), endDate = end.ToString("yyyy-MM-dd"), manager = manager })">Q1 </a>
+                        <a class="dropdown-item" href="@Url.Action("MonthlyTablePage", "MonthlyTablePage", new { startDate = start.AddMonths(3).ToString("yyyy-MM-dd"), endDate = end.AddMonths(3).ToString("yyyy-MM-dd"), manager = manager })"> Q2 </a>
+                        <a class="dropdown-item" href="@Url.Action("MonthlyTablePage", "MonthlyTablePage", new { startDate = start.AddMonths(6).ToString("yyyy-MM-dd"), endDate = end.AddMonths(6).ToString("yyyy-MM-dd"), manager = manager })">Q3</a>
+                        <a class="dropdown-item" href="@Url.Action("MonthlyTablePage", "MonthlyTablePage", new { startDate = start.AddMonths(9).ToString("yyyy-MM-dd"), endDate = end.AddMonths(9).ToString("yyyy-MM-dd"), manager = manager })"> Q4</a>
+                        <a class="dropdown-item" href="@Url.Action("MonthlyGraph", "MonthlyGraph", new { startDate = new DateTime(DateTime.Today.Year, 1, 1).ToString("yyyy-MM-dd"), endDate = new DateTime(DateTime.Today.Year + 1, 1, 1).AddDays(-1).ToString("yyyy-MM-dd"), manager = manager })">Monthly Graph</a>
+
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Last Weeks
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="@Url.Action("WeeklyTable", "WeeklyTable", new { startDate = DateTime.Today.GetFirstDayOfWeek().AddDays(1).AddDays(-7).ToString("yyyy-MM-dd"), endDate = DateTime.Today.GetFirstDayOfWeek().ToString("yyyy-MM-dd"), manager = manager })">1 week</a>
+                        <a class="dropdown-item" href="@Url.Action("WeeklyTable", "WeeklyTable" , new { startDate=DateTime.Today.GetFirstDayOfWeek().AddDays(1).AddDays(-14).ToString("yyyy-MM-dd"), endDate=DateTime.Today.GetFirstDayOfWeek().ToString("yyyy-MM-dd"), manager=manager })">2 weeks</a>
+                        <a class="dropdown-item" href="@Url.Action("WeeklyTable", "WeeklyTable", new { startDate = DateTime.Today.GetFirstDayOfWeek().AddDays(1).AddDays(-21).ToString("yyyy-MM-dd"), endDate = DateTime.Today.GetFirstDayOfWeek().ToString("yyyy-MM-dd"), manager = manager })">3 weeks</a>
+                        <a class="dropdown-item" href="@Url.Action("WeeklyTable", "WeeklyTable", new { startDate = DateTime.Today.GetFirstDayOfWeek().AddDays(1).AddDays(-28).ToString("yyyy-MM-dd"), endDate = DateTime.Today.GetFirstDayOfWeek().ToString("yyyy-MM-dd"), manager = manager })">4 weeks</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        @ViewData["Title"]
+
+        <footer>
+            <p>&copy; 2017 - Desktime Reporting</p>
+        </footer>
+    </div>
+</body>
+</html>
