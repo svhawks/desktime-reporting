@@ -1,5 +1,6 @@
 # Desktime Reporting
-Desktime Reporting project gives insights about employee's working hours using Desktime API.
+<p align="center">Desktime Reporting project gives insights about employee's working hours using Desktime API.</p>
+
 
 ![](https://raw.githubusercontent.com/svtek/desktime-reporting/master/screenshot_1.png)
 
