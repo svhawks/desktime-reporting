@@ -1,0 +1,12 @@
+﻿<h2>This Year - @Html.Raw("Q" + ViewData["quarterNum"]) With overtime</h2>
+
+@Html.Partial("MonthlyTable", new ViewDataDictionary(ViewData) { {
+        "withOvertime", true
+}})
+
+
+<h2>This Year - @Html.Raw("Q" + ViewData["quarterNum"]) Without overtime</h2>
+
+@Html.Partial("MonthlyTable", new ViewDataDictionary(ViewData) { {
+        "withOvertime", false
+}})

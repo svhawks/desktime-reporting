@@ -1,0 +1,61 @@
+﻿
+<h2>Weekly</h2>
+<h3>Start:@ViewData["start"]</h3>
+<h3>End:@ViewData["end"]</h3>
+
+<table class="table table-bordered table-striped table-hover" id="desktime_weekly_report"">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Week Number</th>
+            <th>Week Date</th>
+            <th>Desktime</th>
+            <th>Overtime</th>
+            <th>Undertime</th>
+            <th>Desktime In Hours</th>
+            <th>Overtime In Hours</th>
+            <th>Undertime In Hours</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            DateTime startTime = (DateTime) ViewData["start"];
+            DateTime endTime = (DateTime) ViewData["end"];
+            var manager = ViewData["manager"];
+        }
+
+
+        @foreach (var result in Model)
+        {
+            string fontColor = result.TotalOvertime > result.TotalUndertime ? "green" : "red";
+            if (result.TotalOvertime == result.TotalUndertime)
+            {
+                fontColor = "orange";
+            }
+
+            <tr style="color: @fontColor">
+                <td>@result.Name</td>
+                <td>@result.Week</td>
+                <td>@result.WeekStartDate.ToString("MM/dd") - @result.WeekEndDate.ToString("MM/dd")</td>
+                <td>@result.TotalDesktimePretty</td>
+                <td>@result.TotalOvertimePretty</td>
+                <td>@result.TotalUndertimePretty</td>
+                <td>@result.TotalDesktimeInHours</td>
+                <td>@result.TotalOvertimeInHours</td>
+                <td>@result.TotalUndertimeInHours</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-end">
+        <li class="page-item">
+            <a class="page-link" href="@Url.Action("WeeklyTable", "WeeklyTable" , new { startDate=startTime.AddDays(-7).ToString("yyyy-MM-dd"), endDate=startTime.AddDays(-1).ToString("yyyy-MM-dd"), manager=manager })" tabindex="-1">Previous Week</a>
+        </li>
+        <li class="page-item @Html.Raw(DateTime.Today.WeekOfYear() == endTime.WeekOfYear() ? "disabled" : "")">
+            <a class="page-link" href="@Url.Action("WeeklyTable", "WeeklyTable" , new { startDate=endTime.AddDays(1).ToString("yyyy-MM-dd"), endDate= DateTime.Today < endTime.AddDays(7) ? DateTime.Today.ToString("yyyy-MM-dd") : endTime.AddDays(7).ToString("yyyy-MM-dd"), manager=manager })">Next Week</a>
+        </li>
+    </ul>
+</nav>

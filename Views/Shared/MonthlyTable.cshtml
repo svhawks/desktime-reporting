@@ -1,0 +1,124 @@
+﻿
+@{
+    int startMonth = ((DateTime)ViewData["startDate"]).Month;
+    int endMonth = ((DateTime)ViewData["endDate"]).Month;
+    int numMonths = endMonth - startMonth + 1;
+
+    Dictionary<string, Dictionary<int, int>> values = new Dictionary<string, Dictionary<int, int>>();
+
+    foreach (var result in Model)
+    {
+        values.Add(result.Name, new Dictionary<int, int>());
+        for (int i = startMonth; i <= endMonth; i++)
+        {
+            int monthDesktime = result.MonthlyDesktimes.ContainsKey(i) ? result.MonthlyDesktimes[i] / (60 * 60) + (result.MonthlyDesktimes[i] % (60 * 60) >= 20 * 60 ? 1 : 0) : 0;
+
+            values[result.Name].Add(i, monthDesktime);
+        }
+    }
+}
+<table class="table table-bordered table-striped table-hover" id="@Html.Raw("desktime_Q" + ViewData["quarterNum"] + "_report")">
+    <thead>
+        <tr>
+            <th>Name</th>
+            @for (int monthNum = startMonth; monthNum <= endMonth; monthNum++)
+            {
+                <th>@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(monthNum)</th>
+            }
+            <th>Total</th>
+            @for (int monthNum = startMonth; monthNum <= endMonth; monthNum++)
+            {
+                <th>Overtime @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(monthNum)</th>
+            }
+            <th>Overtime Total</th>
+            @for (int monthNum = startMonth; monthNum <= endMonth; monthNum++)
+            {
+                <th>Undertime @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(monthNum)</th>
+            }
+            <th>Undertime Total</th>
+        </tr>
+   </thead>
+    <tbody>
+                @foreach (var employee in values)
+                {
+                    int totalDesktime = 0;
+                    int totalOvertime = 0;
+                    int totalUndertime = 0;
+                    Dictionary<int, int> overtimeValues = new Dictionary<int, int>();
+                    Dictionary<int, int> undertimeValues = new Dictionary<int, int>();
+
+                    @for (int monthNum = startMonth; monthNum <= endMonth; monthNum++)
+                    {
+                        totalDesktime += employee.Value[monthNum];
+
+                        DateTime curMonthStart = new DateTime(DateTime.Today.Year, monthNum, 1);
+
+                        int curOvertime;
+                        int curUndertime;
+
+                        if (DateTime.Today < curMonthStart)
+                        {
+                            curOvertime = 0;
+                            curUndertime = 0;
+                        } else
+                        {
+                            int numOfWorkdays = Math.Min(5 * 4, curMonthStart.BusinessDaysUntil(DateTime.Today.AddDays(-1)));
+
+                            curOvertime = Math.Max(0, employee.Value[monthNum] - 8 * numOfWorkdays);
+                            curUndertime = Math.Max(0, 8 * numOfWorkdays - employee.Value[monthNum]);
+                        }
+
+                        totalOvertime += curOvertime;
+                        overtimeValues.Add(monthNum, curOvertime);
+
+                        totalUndertime += curUndertime;
+                        undertimeValues.Add(monthNum, curUndertime);
+                    }
+
+                    if ((totalOvertime == 0 && ((bool)ViewData["withOvertime"])) || (totalOvertime != 0 && !((bool)ViewData["withOvertime"])))
+                    {
+                        continue;
+                    } else {
+
+                    }
+
+                    string fontColor = totalOvertime > totalUndertime ? "green" : "red";
+                    if (totalUndertime == totalOvertime)
+                    {
+                        fontColor = "orange";
+                    }
+
+                    <tr style="color: @fontColor">
+                        <td>@employee.Key</td>
+                        @for (int monthNum = startMonth; monthNum <= endMonth; monthNum++)
+                        {
+                            string monthFontColor = overtimeValues[monthNum] > undertimeValues[monthNum] ? "green" : "red";
+                            <td style="color: @monthFontColor">@employee.Value[monthNum]</td>
+                        }
+                        <td>@totalDesktime</td>
+
+                        @for (int monthNum = startMonth; monthNum <= endMonth; monthNum++)
+                        {
+                            string monthExtratimeFontColor = overtimeValues[monthNum] > undertimeValues[monthNum] ? "green" : "red";
+                            if (overtimeValues[monthNum] == undertimeValues[monthNum])
+                            {
+                                monthExtratimeFontColor = "orange";
+                            }
+                            <td style="color: @monthExtratimeFontColor">@overtimeValues[monthNum]</td>
+                        }
+                        <td>@totalOvertime</td>
+
+                        @for (int monthNum = startMonth; monthNum <= endMonth; monthNum++)
+                        {
+                            string monthExtratimeFontColor = overtimeValues[monthNum] > undertimeValues[monthNum] ? "green" : "red";
+                            if (overtimeValues[monthNum] == undertimeValues[monthNum])
+                            {
+                                monthExtratimeFontColor = "orange";
+                            }
+                            <td style="color: @monthExtratimeFontColor">@undertimeValues[monthNum]</td>
+                        }
+                        <td>@totalUndertime</td>
+                    </tr>
+                }
+    </tbody>
+</table>

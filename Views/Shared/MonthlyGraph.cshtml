@@ -1,0 +1,116 @@
+﻿
+<div id="quarterlyChart"></div>
+
+<script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+<script>
+ zingchart.MODULESDIR = "https://cdn.zingchart.com/modules/";
+		ZC.LICENSE = ["569d52cefae586f634c54f86dc99e6a9","ee6b7db5b51705a13dc2339db3edaf6d"];</script>
+<style type="text/css">
+    #quarterlyChart {
+        width: 100%;
+        height: 800px;
+    }
+</style>
+@{
+    int empCount = 0;
+    int counter = 0;
+    var people = new Dictionary<string, int>();
+    var qs = new Dictionary<string, int>[12];
+    for (int x = 0; x < 12; x++)
+    {
+        qs[x] = new Dictionary<string, int>();
+    }
+
+    foreach (var emp in Model)
+    {
+        if (!people.ContainsKey(emp.Name))
+        {
+            empCount++;
+            people[emp.Name] = counter++;
+        }
+        qs[emp.Month - 1][emp.Name] = Convert.ToInt32(emp.Desktime) / (60 * 60);
+
+    }
+
+    var names = new List<string>();
+    var defStyles = new string[] { "red", "orange", "yellow", "green", "blue", "purple" };
+    var styles = new List<string>();
+    int i = 0;
+    var values = new int[12][];
+
+    for (int x = 0; x < 12; x++)
+    {
+        values[x] = new int[empCount];
+    }
+
+    foreach (var emp in Model)
+    {
+        if (!names.Exists(e => e == emp.Name.Split()[0]))
+        {
+            names.Add(emp.Name.Split()[0]);
+        }
+        styles.Add(defStyles[i % defStyles.Count()]);
+        var c = people[emp.Name];
+        for (int x = 0; x < 12; x++)
+        {
+            values[x][people[emp.Name]] = qs[x].ContainsKey(emp.Name) ? qs[x][emp.Name] : 0;
+        }
+        i++;
+    }
+}
+<script type="text/javascript">
+        var myConfig = {
+            "type": "bar",
+            "title": {
+                "text": "This Year - Monthly Graph",
+                "fontSize": 18
+            },
+            "plot": {
+                "tooltip": {
+                    "text": "%t: %v"
+                }
+            },
+            "scale-x": {
+                "labels": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(names))
+            },
+            "legend": {
+                "layout": "3x4",
+                "padding": "20%"
+            },
+            "scale-y": {
+                "markers": [
+                    {
+                        "type": "line",
+                        "range": [160],
+                        "line-width": 3,
+                        "line-color": "green",
+                        "placement": "bottom",
+                        "label-placement": "normal",
+                        "label-alignment": "normal"
+                    }
+                ],
+                "values": "0:300:20"
+            },
+            "series": [
+                { "text":"January", "values": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(values[0])) },
+                { "text": "February", "values": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(values[1])) },
+                { "text": "March", "values": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(values[2])) },
+                { "text": "April", "values": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(values[3])) },
+                { "text": "May", "values": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(values[4])) },
+                { "text": "June", "values": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(values[5])) },
+                { "text": "July", "values": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(values[6])) },
+                { "text": "August", "values": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(values[7])) },
+                { "text": "September", "values": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(values[8])) },
+                { "text": "October", "values": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(values[9])) },
+                { "text": "November", "values": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(values[10])) },
+                { "text": "December", "values": @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(values[11])) }
+            ]
+        };
+
+        zingchart.render({
+            id: 'quarterlyChart',
+            data: myConfig,
+            height: "100%",
+            width: "100%"
+        });
+</script>
