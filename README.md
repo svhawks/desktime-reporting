@@ -1,6 +1,8 @@
 # Desktime Reporting
 Desktime Reporting project gives insights about employee's working hours using Desktime API.
 
+![](https://raw.githubusercontent.com/svtek/desktime-reporting/master/screenshot_1.png)
+
 ### Setup
 * Replace `API_KEY` property with your Desktime API Key. You can get your API Key from `https://desktime.com/app/api`
 * Replace `MANAGERS` property based on the following example:
