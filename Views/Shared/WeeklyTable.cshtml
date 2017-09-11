@@ -12,9 +12,10 @@
             <th>Desktime</th>
             <th>Overtime</th>
             <th>Undertime</th>
-            <th>Desktime In Hours</th>
-            <th>Overtime In Hours</th>
-            <th>Undertime In Hours</th>
+            <th>Desktime hhmm</th>
+            <th>Overtime hhmm</th>
+            <th>Undertime hhmm</th>
+           
         </tr>
     </thead>
     <tbody>
@@ -37,12 +38,12 @@
                 <td>@result.Name</td>
                 <td>@result.Week</td>
                 <td>@result.WeekStartDate.ToString("MM/dd") - @result.WeekEndDate.ToString("MM/dd")</td>
-                <td>@result.TotalDesktimePretty</td>
-                <td>@result.TotalOvertimePretty</td>
-                <td>@result.TotalUndertimePretty</td>
                 <td>@result.TotalDesktimeInHours</td>
                 <td>@result.TotalOvertimeInHours</td>
                 <td>@result.TotalUndertimeInHours</td>
+                <td>@result.TotalDesktimePretty</td>
+                <td>@result.TotalOvertimePretty</td>
+                <td>@result.TotalUndertimePretty</td>
             </tr>
         }
     </tbody>
